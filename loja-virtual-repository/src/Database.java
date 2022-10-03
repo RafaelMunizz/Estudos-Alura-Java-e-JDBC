@@ -41,27 +41,42 @@ public class Database {
 		// Abrindo a conexão com o banco
 		cnc = createCnc.openConnection();
 		
-		// PreparedStatement serve para passar parâmetros para as consultas por meio de '?' na query (consulta).
-		// Uso do "RETURN_GENERATED_KEYS" para que possamos obter um retorno do ID que foi inserido dessa vez.
-		PreparedStatement stmt = cnc.prepareStatement("insert into produto (nome, descricao) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+		cnc.setAutoCommit(false);
 		
-		// Setando os valores que irão ser substituídos na query.
-		stmt.setString(1, nome);
-		stmt.setString(2, descricao);
-		
-		// Executando a query
-		stmt.execute();
-		
-		// Resultado
-		ResultSet rst = stmt.getGeneratedKeys();
-		
-		while(rst.next()) {
-			Integer id = rst.getInt(1);
-			System.out.printf("ID criado: %d", id);
+		try {
+			
+			// PreparedStatement serve para passar parâmetros para as consultas por meio de '?' na query (consulta).
+			// Uso do "RETURN_GENERATED_KEYS" para que possamos obter um retorno do ID que foi inserido dessa vez.
+			PreparedStatement stmt = cnc.prepareStatement("insert into produto (nome, descricao) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+			
+			// Setando os valores que irão ser substituídos na query.
+			stmt.setString(1, nome);
+			stmt.setString(2, descricao);
+			
+			// Executando a query
+			stmt.execute();
+			
+			// Resultado
+			ResultSet rst = stmt.getGeneratedKeys();
+			
+			while(rst.next()) {
+				Integer id = rst.getInt(1);
+				System.out.printf("ID criado: %d", id);
+			}
+			
+			// Validando a transação
+			cnc.commit();
+			
+			// Fechando a conexão com o banco
+			createCnc.closeConnection(cnc);
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("!!!ROLLBACK EXECUTADO!!!");
+			// Retornar os dados em caso de erro para que não sejam perdidos
+			cnc.rollback();
 		}
 		
-		// Fechando a conexão com o banco
-		createCnc.closeConnection(cnc);
 	}
 	
 	// Método com sobrecarga para que o usuário possa passar tanto uma string e um inteiro
@@ -73,7 +88,7 @@ public class Database {
 		
 		// PreparedStatement serve para passar parâmetros para as consultas por meio de '?' na query (consulta).
 		// Uso do "RETURN_GENERATED_KEYS" para que possamos obter um retorno do ID que foi inserido dessa vez.
-		PreparedStatement stmt = cnc.prepareStatement("delete from produto where (?) = (?)", Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = cnc.prepareStatement("delete from produto where ? = ?", Statement.RETURN_GENERATED_KEYS);
 		
 		// Setando os valores que irão ser substituídos na query.
 		stmt.setString(1, coluna);
@@ -102,11 +117,14 @@ public class Database {
 		
 		// PreparedStatement serve para passar parâmetros para as consultas por meio de '?' na query (consulta).
 		// Uso do "RETURN_GENERATED_KEYS" para que possamos obter um retorno do ID que foi inserido dessa vez.
-		PreparedStatement stmt = cnc.prepareStatement("delete from produto where (?) = (?)", Statement.RETURN_GENERATED_KEYS);
-		
+		//PreparedStatement stmt = cnc.prepareStatement("delete from produto where " + coluna + " = "  + dado, Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = cnc.prepareStatement("delete from produto where ? = ?", Statement.RETURN_GENERATED_KEYS);
 		// Setando os valores que irão ser substituídos na query.
 		stmt.setString(1, coluna);
 		stmt.setString(2, dado);
+		
+		System.out.println(stmt);
+		System.out.println(coluna);
 		
 		// Executando a query
 		stmt.execute();
