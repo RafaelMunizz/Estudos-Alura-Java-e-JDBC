@@ -7,7 +7,6 @@ public class ConnectionFactory {
 	public Connection openConnection(){
 		
 		Connection cnc = null;
-		
 		try {
 			//"jdbc:mysql://localhost/NOME_DO_BANCO?useTimezone=true&serverTimezone=UTC", "USUÁRIO", "SENHA"
 			cnc = DriverManager.getConnection("jdbc:mysql://localhost/loja_virtual?useTimezone=true&serverTimezone=UTC", "root", "root");
