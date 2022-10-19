@@ -1,30 +1,32 @@
+package loja;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class ConnectionFactory {
 	
-	public Connection openConnection(){
+	public DataSource dataSource;
+	
+	public ConnectionFactory() {
 		
-		Connection cnc = null;
-		try {
-			//"jdbc:mysql://localhost/NOME_DO_BANCO?useTimezone=true&serverTimezone=UTC", "USUÁRIO", "SENHA"
-			cnc = DriverManager.getConnection("jdbc:mysql://localhost/loja_virtual?useTimezone=true&serverTimezone=UTC", "root", "root");
-			//System.out.print("\nConectou!!\n");
-			
-		} catch (SQLException e) {
-			System.out.printf("\nNão conectou!! Erro: ", e);
-		}
-		return cnc;
+		ComboPooledDataSource comboPooledDataSource = new ComboPooledDataSource();
+		comboPooledDataSource.setJdbcUrl("jdbc:mysql://localhost/loja_virtual?useTimezone=true&serverTimezone=UTC");
+		comboPooledDataSource.setUser("root");
+		comboPooledDataSource.setPassword("root");
+		
+		// Setando o máximo de requisições por vez no banco
+		comboPooledDataSource.setMaxPoolSize(15);
+
+		this.dataSource = comboPooledDataSource;
+		
 	}
 	
-	public void closeConnection(Connection cnc) {
+	public Connection openConnection() throws SQLException{
 		
-		try {
-			cnc.close();
-			//System.out.print("\nConexão fechada!!");
-		} catch (SQLException e) {
-			System.out.printf("\nConexão não fechada!! Erro: ", e);
-		}
+		return this.dataSource.getConnection();
 	}
+	
 }
